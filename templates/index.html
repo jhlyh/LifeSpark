@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>LifeSpark Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <!-- 使用明确版本，避免被缓存或加载失败 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
 </head>
 <body>
     <h2>LifeSpark 实时监控</h2>
@@ -26,7 +27,7 @@
         chart.setOption(option);
 
         function fetchData() {
-            fetch('/data')
+            fetch('/data')  // 如果跨机器访问，请改成 http://<WSL_IP>:5000/data
             .then(response => response.json())
             .then(data => {
                 let time = new Date(data.time * 1000).toLocaleTimeString();
@@ -40,7 +41,8 @@
                     option.series.forEach(s => s.data.shift());
                 }
                 chart.setOption(option);
-            });
+            })
+            .catch(err => console.error("数据请求失败：", err));
         }
 
         setInterval(fetchData, 1000);
