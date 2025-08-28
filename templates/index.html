@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LifeSpark Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body>
+    <h2>LifeSpark 实时监控</h2>
+    <div id="chart" style="width: 600px; height: 400px;"></div>
+
+    <script>
+        var chart = echarts.init(document.getElementById('chart'));
+        var option = {
+            title: { text: '传感器数据' },
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['温度', '湿度', '心率'] },
+            xAxis: { type: 'category', data: [] },
+            yAxis: { type: 'value' },
+            series: [
+                { name: '温度', type: 'line', data: [] },
+                { name: '湿度', type: 'line', data: [] },
+                { name: '心率', type: 'line', data: [] }
+            ]
+        };
+        chart.setOption(option);
+
+        function fetchData() {
+            fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                let time = new Date(data.time * 1000).toLocaleTimeString();
+                option.xAxis.data.push(time);
+                option.series[0].data.push(data.temperature);
+                option.series[1].data.push(data.humidity);
+                option.series[2].data.push(data.heart_rate);
+
+                if (option.xAxis.data.length > 20) {
+                    option.xAxis.data.shift();
+                    option.series.forEach(s => s.data.shift());
+                }
+                chart.setOption(option);
+            });
+        }
+
+        setInterval(fetchData, 1000);
+    </script>
+</body>
+</html>
